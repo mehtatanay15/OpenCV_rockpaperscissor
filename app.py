@@ -12,6 +12,17 @@ finger_tips = [4, 8, 12, 16, 20]
 # Start video capture
 cap = cv2.VideoCapture(0)
 
+def get_gesture(finger_count):
+    """
+    Determine the gesture based on finger count
+    """
+    gestures = {
+        0: "Rock 👊",
+        2: "Scissors ✌️",
+        5: "Paper ✋"
+    }
+    return gestures.get(finger_count, "Unknown Gesture")
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -25,6 +36,7 @@ while cap.isOpened():
     results = hands.process(rgb_frame)
 
     finger_count = 0  # Variable to store the number of raised fingers
+    gesture = "No Hand Detected"
 
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
@@ -41,11 +53,17 @@ while cap.isOpened():
                 if landmarks[finger_tips[i]].y < landmarks[finger_tips[i] - 2].y:
                     finger_count += 1
 
-    # Display the detected number
+            # Get the gesture based on finger count
+            gesture = get_gesture(finger_count)
+
+    # Display the detected number and gesture
     cv2.putText(frame, f"Number: {finger_count}", (50, 100),
                 cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+    
+    cv2.putText(frame, f"Gesture: {gesture}", (50, 200),
+                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 0), 3)
 
-    cv2.imshow("Hand Detection", frame)
+    cv2.imshow("Hand Gesture Recognition", frame)
 
     # Exit on pressing 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
